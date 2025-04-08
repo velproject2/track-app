@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const urlParams = new URLSearchParams(window.location.search);
     const track = urlParams.get('track');
     const trackNumberSelect = document.getElementById("trackNumber");
-    const BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://trackex.onrender.com';
+    const BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://trackapp-vel.onrender.com';
 
     if (track && trackNumberSelect) {
         document.getElementById('trackHeading').textContent = `${track} - ${document.title}`;
