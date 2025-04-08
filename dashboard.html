@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="./style.css">
+    <style>
+        #loginPrompt { display: block; }
+        #dashboardContent { display: none; }
+        .filter-bar { margin: 10px 0; }
+        #popup {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px;
+            color: white;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+        .button-column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 45%;
+        }
+        button {
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        #searchApx {
+            width: 300px; /* Set size for search bar */
+            padding: 8px;
+            font-size: 16px;
+        }
+        #filterTime {
+            width: 200px; /* Set size for filter dropdown */
+            padding: 8px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loginPrompt">
+            <h1>Dashboard Login</h1>
+            <label for="dashboardPassword">Password:</label>
+            <input type="password" id="dashboardPassword" required>
+            <button onclick="loginToDashboard()">Login</button>
+            <button onclick="location.href='index.html'">Go Back</button>
+            <p id="loginError" style="color: red; display: none;">Invalid password</p>
+        </div>
+        
+        <div id="dashboardContent">
+            <h1>Dashboard</h1>
+            <div class="filter-bar">
+                <input type="text" id="searchApx" placeholder="Search by APX Number" onkeyup="filterEntries()">
+                <select id="filterTime" onchange="filterEntries()">
+                    <option value="all">All Time</option>
+                    <option value="month">This Month</option>
+                    <option value="week">This Week</option>
+                    <option value="year">This Year</option>
+                    <option value="latest">Latest First</option>
+                </select>
+            </div>
+            <div id="popup"></div>
+            <div class="button-container">
+                <div class="button-column">
+                    <button onclick="deleteSelected()">Delete Selected</button>
+                    <button onclick="exportToExcel()">Export to Excel</button>
+                </div>
+                <div class="button-column">
+                    <button onclick="clearEntries()">Clear Entries</button>
+                    <button onclick="location.href='index.html'">Go Back</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table border="1">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll()"></th>
+                            <th>APX / SO Number</th>
+                            <th>Model Name</th>
+                            <th>Track</th>
+                            <th>Track Number</th>
+                            <th>Email</th>
+                            <th>Driver Name</th>
+                            <th>Check-In Date</th>
+                            <th>Check-In Time</th>
+                            <th>Check-Out Date</th>
+                            <th>Check-Out Time</th>
+                            <th>Hours Utilized</th>
+                            <th>Total Price (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dashboardTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="./app.js"></script>
+</body>
+</html>

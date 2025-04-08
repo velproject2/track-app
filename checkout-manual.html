@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check-Out Manual</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div class="container form-container">
+        <h1 id="trackHeading">Check-Out Manual</h1>
+        <form id="checkOutForm">
+            <label for="apxNumber">APX / SO Number:</label>
+            <input type="text" id="apxNumber" maxlength="20"  title="APX/SO Number not more than 20 digits" required>
+            <label for="modelName">Model Name:</label>
+            <input type="text" id="modelName" required>
+            <label for="trackNumber">Track Number:</label>
+            <select id="trackNumber" required>
+                <option value="">--Select Track Number--</option>
+            </select>
+            <label for="email">Email (Under whom test is):</label>
+            <input type="email" id="email" required>
+            <label for="driverName">Driver Name:</label>
+            <input type="text" id="driverName" required>
+            <label for="checkOutDate">Check-Out Date:</label>
+            <input type="date" id="checkOutDate" required>
+            <label for="checkOutTime">Check-Out Time:</label>
+            <input type="time" id="checkOutTime" required>
+            <div class="button-group">
+                <button type="submit">Check-Out</button>
+                <button type="button" onclick="goBack()">Go Back</button>
+            </div>
+        </form>
+    </div>
+    <script src="./app.js"></script>
+</body>
+</html>

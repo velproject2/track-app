@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <link rel="stylesheet" href="./style.css">
+    <style>
+        .container {
+            text-align: center;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative; 
+        }
+        .button-group {
+            display: flex;
+            justify-content: center; 
+            margin-bottom: 20px;
+        }
+        .button-group button {
+            width: 200px;
+            height: 40px;
+            font-size: 16px;
+            padding: 0;
+            text-align: center;
+            cursor: pointer;
+        }
+        .profile-icon {
+            position: absolute;
+            top: 30px;
+            right:40px;
+            cursor: pointer;
+            font-size: 28px; 
+        }
+        .dropdown-menu {
+            display: none; 
+            position: absolute;
+            top: 70px; 
+            right: 40px;
+            background-color: #ff9800;
+           
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        .dropdown-menu button {
+            display: block;
+            width: 200px; 
+            height: 40px;
+            font-size: 12px;
+            padding: 0;
+            text-align: center;
+            border: none;
+            background-color: #ff9800;
+            cursor: pointer;
+        }
+        .dropdown-menu button:hover {
+            background-color: #f1b175;
+        }
+    </style>
+</head>
+<body>
+    <div id="loginForm" class="container">
+        <h1>Admin Login</h1>
+        <label for="username">Username:</label>
+        <input type="text" id="username" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" required>
+        <button onclick="login()">Login</button>
+        <button onclick="location.href='index.html'">Go Back</button>
+        <p id="loginError" style="color: red; display: none;">Invalid credentials</p>
+    </div>
+    <div id="adminDashboard" class="container" style="display: none;">
+        <h1>Admin Dashboard</h1>
+        <span class="profile-icon" onclick="toggleDropdown()">👤</span> <!-- Profile icon -->
+        <div class="dropdown-menu" id="profileDropdown">
+            <button onclick="changeAdminPassword()">Change Admin Password</button>
+            <button onclick="changeDashboardPassword()">Change Dashboard Password</button>
+        </div>
+        <div class="button-group">
+            <button onclick="setGSTRate()">Set GST Rate</button>
+        </div>
+        <p id="currentGSTRate" style="margin: 10px 0;"></p>
+        <label for="trackSelect">Select Track:</label>
+        <select id="trackSelect" onchange="displaySubTracks()">
+            <option value="">--Select Track--</option>
+            <option value="NATRAX">NATRAX</option>
+            <option value="GARC">GARC</option>
+            <option value="WABCO">WABCO</option>
+            <option value="NCAT">NCAT</option>
+            <option value="MSPT">MSPT</option>
+        </select>
+        <div class="table-container">
+            <table id="subTrackTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Sub Track</th>
+                        <th>Current Price</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="subTrackTableBody"></tbody>
+            </table>
+        </div>
+        <button onclick="location.href='index.html'">Go Back</button>
+    </div>
+    <script src="./app.js"></script>
+    <script>
+        function toggleDropdown() {
+            const dropdown = document.getElementById("profileDropdown");
+            dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+        }
+        // Close dropdown if clicking outside
+        document.addEventListener("click", function(event) {
+            const dropdown = document.getElementById("profileDropdown");
+            const icon = document.querySelector(".profile-icon");
+            if (!icon.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.style.display = "none";
+            }
+        });
+    </script>
+</body>
+</html>
