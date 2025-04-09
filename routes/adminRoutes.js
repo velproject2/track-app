@@ -5,20 +5,20 @@ const { client } = require('../server');
 router.post('/track-prices', async (req, res) => {
   try {
     console.log('POST /api/admin/track-prices received:', req.body);
-    const { track, subTrack, price } = req.body;
+    const { track, subTrack, vehicleWeight, price } = req.body;
 
-    if (!track || !subTrack || typeof price !== 'number' || isNaN(price)) {
-      console.log('Invalid input:', { track, subTrack, price });
-      return res.status(400).json({ message: 'Invalid input: track, subTrack, and price (number) are required' });
+    if (!track || !subTrack || !vehicleWeight || typeof price !== 'number' || isNaN(price)) {
+      console.log('Invalid input:', { track, subTrack, vehicleWeight, price });
+      return res.status(400).json({ message: 'Invalid input: track, subTrack, vehicleWeight, and price (number) are required' });
     }
 
     await client.execute(
-      'INSERT INTO track_prices (track, subTrack, price) VALUES (?, ?, ?)',
-      [track, subTrack, price],
+      'INSERT INTO track_prices (track, subTrack, vehicleWeight, price) VALUES (?, ?, ?, ?)',
+      [track, subTrack, vehicleWeight, price],
       { prepare: true }
     );
 
-    const updatedPrice = { track, subTrack, price };
+    const updatedPrice = { track, subTrack, vehicleWeight, price };
     console.log('Successfully updated price in DB:', updatedPrice);
     res.status(200).json(updatedPrice);
   } catch (error) {
