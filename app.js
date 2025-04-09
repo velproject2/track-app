@@ -27,43 +27,44 @@ document.addEventListener("DOMContentLoaded", function () {
     const checkOutForm = document.getElementById("checkOutForm");
 
     if (checkInForm) {
-        checkInForm.addEventListener("submit", function (e) {
-            e.preventDefault();
-            let apxNumber = document.getElementById("apxNumber").value.trim();
-            let modelName = document.getElementById("modelName").value.trim();
-            let trackNumber = document.getElementById("trackNumber").value;
-            let email = document.getElementById("email").value.trim();
-            let driverName = document.getElementById("driverName").value.trim();
-            let entry = { apxNumber, modelName, track, trackNumber, driverName, email }; // Removed userName
+    checkInForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        let apxNumber = document.getElementById("apxNumber").value.trim();
+        let modelName = document.getElementById("modelName").value.trim();
+        let trackNumber = document.getElementById("trackNumber").value;
+        let vehicleWeight = document.getElementById("vehicleWeight").value;
+        let email = document.getElementById("email").value.trim();
+        let driverName = document.getElementById("driverName").value.trim();
+        let entry = { apxNumber, modelName, track, trackNumber, vehicleWeight, driverName, email };
 
-            if (document.getElementById("checkInDate")) {
-                const checkInDate = document.getElementById("checkInDate").value;
-                const checkInTime = document.getElementById("checkInTime").value;
-                entry.checkInTime = new Date(`${checkInDate}T${checkInTime}`).toLocaleString();
-            }
+        if (document.getElementById("checkInDate")) {
+            const checkInDate = document.getElementById("checkInDate").value;
+            const checkInTime = document.getElementById("checkInTime").value;
+            entry.checkInTime = new Date(`${checkInDate}T${checkInTime}`).toISOString();
+        }
 
-            fetch(`${BASE_URL}/api/checkin`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(entry)
-            })
-            .then(response => {
-                if (!response.ok) throw new Error(response.statusText);
-                return response.json();
-            })
-            .then(data => {
-                showPopup("Check-In Successful!");
-                checkInForm.reset();
-                setTimeout(() => {
-                    location.href = `checkout-automate.html?track=${track}&apx=${apxNumber}`;
-                }, 3000);
-            })
-            .catch(error => {
-                console.error('Check-In Failed:', error);
-                showPopup('Check-In Failed: ' + error.message, 'error');
-            });
+        fetch(`${BASE_URL}/api/checkin`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(entry)
+        })
+        .then(response => {
+            if (!response.ok) throw new Error(response.statusText);
+            return response.json();
+        })
+        .then(data => {
+            showPopup("Check-In Successful!");
+            checkInForm.reset();
+            setTimeout(() => {
+                location.href = `checkout-automate.html?track=${track}&apx=${apxNumber}`;
+            }, 3000);
+        })
+        .catch(error => {
+            console.error('Check-In Failed:', error);
+            showPopup('Check-In Failed: ' + error.message, 'error');
         });
-    }
+    });
+}
 
     if (checkOutForm) {
         checkOutForm.addEventListener("submit", function (e) {
