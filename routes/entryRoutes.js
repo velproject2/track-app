@@ -98,8 +98,8 @@ router.post('/checkout', async (req, res) => {
     const checkInTime = entry.checkintime;
     const nowUTC = new Date(Date.now());
     const checkOut = checkOutTime || nowUTC.toISOString();
-    const hoursUtilized = calculateHours(checkInTime, checkOut);
-    const hoursBilled = Math.ceil(hoursUtilized);
+    const hoursUtilized = calculateHours(checkInTime, checkOut); // Now returns hr:min:sec
+    const hoursBilled = Math.ceil(parseFloat(hoursUtilized.split(':')[0]) + parseFloat(hoursUtilized.split(':')[1]) / 60 + parseFloat(hoursUtilized.split(':')[2]) / 3600);
 
     if (!entry.track || !entry.tracknumber) {
       console.log('Missing track or trackNumber in entry:', entry);
@@ -148,7 +148,7 @@ router.post('/checkout', async (req, res) => {
     await sendEmail(
       entry.email,
       'Check-Out Confirmation :)',
-      `Hello,\n\nCheck-out has been completed by: ${entry.drivername}\nfor APX Number: ${apxNumber}\nModel: ${entry.modelname}\nTrack: ${entry.track} - ${entry.tracknumber}\nVehicle Weight: ${vehicleWeight === 'less_than_3.5' ? 'Less than 3.5 tonnes' : 'Greater than 3.5 tonnes'}\nCheck-In: ${checkInFormatted}\nCheck-Out: ${checkOutFormatted}\nHours Utilized: ${hoursUtilized.toFixed(2)}\nTotal Price(Incl.GST): ₹${totalPrice.toFixed(2)}\n\nThank you!\n\n\nRegards@VEL`
+      `Hello,\n\nCheck-out has been completed by: ${entry.drivername}\nfor APX Number: ${apxNumber}\nModel: ${entry.modelname}\nTrack: ${entry.track} - ${entry.tracknumber}\nVehicle Weight: ${vehicleWeight === 'less_than_3.5' ? 'Less than 3.5 tonnes' : 'Greater than 3.5 tonnes'}\nCheck-In: ${checkInFormatted}\nCheck-Out: ${checkOutFormatted}\nHours Utilized: ${hoursUtilized}\nTotal Price(Incl.GST): ₹${totalPrice.toFixed(2)}\n\nThank you!\n\n\nRegards@VEL`
     );
 
     const updatedEntry = { ...entry, checkOutTime: checkOut, totalPrice };
@@ -218,7 +218,10 @@ function calculateHours(checkInTime, checkOutTime) {
   const start = new Date(checkInTime);
   const end = new Date(checkOutTime);
   const diffMs = Math.abs(end - start);
-  return diffMs / (1000 * 60 * 60);
+  const hours = Math.floor(diffMs / (1000 * 60 * 60));
+  const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+  return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
 module.exports = router;
