@@ -253,48 +253,48 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     window.displayDashboardEntries = function () {
-        fetch(`${BASE_URL}/api/entries`)
-            .then(response => response.json())
-            .then(entries => {
-                const dashboardTableBody = document.getElementById("dashboardTableBody");
-                if (dashboardTableBody) {
-                    dashboardTableBody.innerHTML = "";
-                    if (entries.length === 0) {
-                        dashboardTableBody.innerHTML = "<tr><td colspan='13'>No entries found</td></tr>";
-                    } else {
-                        entries.forEach(entry => {
-                            let checkInDate = new Date(entry.checkintime);
-                            let checkOutDate = entry.checkouttime ? new Date(entry.checkouttime) : null;
-                            let hoursUtilized = checkOutDate ? calculateHours(checkInDate, checkOutDate) : 'Not Checked Out';
-                            let totalPrice = entry.totalprice !== null ? entry.totalprice.toFixed(2) : "N/A";
-    
-                            // Store apxNumber and checkInTime in the checkbox value as JSON
-                            let row = `<tr>
-                                <td><input type="checkbox" class="entryCheckbox" value='${JSON.stringify({ apxNumber: entry.apxnumber, checkInTime: entry.checkintime })}'></td>
-                                <td>${entry.apxnumber}</td>
-                                <td>${entry.modelname}</td>
-                                <td>${entry.track}</td>
-                                <td>${entry.tracknumber}</td>
-                                <td>${entry.drivername}</td>
-                                <td>${entry.email}</td>
-                                <td>${checkInDate.toLocaleDateString()}</td>
-                                <td>${checkInDate.toLocaleTimeString()}</td>
-                                <td>${checkOutDate ? checkOutDate.toLocaleDateString() : 'Not Checked Out'}</td>
-                                <td>${checkOutDate ? checkOutDate.toLocaleTimeString() : 'Not Checked Out'}</td>
-                                <td>${hoursUtilized}</td>
-                                <td>${totalPrice}</td>
-                            </tr>`;
-                            dashboardTableBody.innerHTML += row;
-                        });
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching entries:', error);
-                showPopup('Error fetching entries: ' + error.message, 'error');
-            });
-    };
+    fetch(`${BASE_URL}/api/entries`)
+        .then(response => response.json())
+        .then(entries => {
+            const dashboardTableBody = document.getElementById("dashboardTableBody");
+            if (dashboardTableBody) {
+                dashboardTableBody.innerHTML = "";
+                if (entries.length === 0) {
+                    dashboardTableBody.innerHTML = "<tr><td colspan='14'>No entries found</td></tr>";
+                } else {
+                    entries.forEach(entry => {
+                        let checkInDate = new Date(entry.checkintime);
+                        let checkOutDate = entry.checkouttime ? new Date(entry.checkouttime) : null;
+                        let hoursUtilized = checkOutDate ? calculateHours(checkInDate, checkOutDate) : 'Not Checked Out';
+                        let totalPrice = entry.totalprice !== null ? entry.totalprice.toFixed(2) : "N/A";
+                        let vehicleWeightText = entry.vehicleweight === "less_than_3.5" ? "Less than 3.5 tonnes" : "Greater than 3.5 tonnes";
 
+                        let row = `<tr>
+                            <td><input type="checkbox" class="entryCheckbox" value='${JSON.stringify({ apxNumber: entry.apxnumber, checkInTime: entry.checkintime })}'></td>
+                            <td>${entry.apxnumber}</td>
+                            <td>${entry.modelname}</td>
+                            <td>${entry.track}</td>
+                            <td>${entry.tracknumber}</td>
+                            <td>${vehicleWeightText}</td>
+                            <td>${entry.drivername}</td>
+                            <td>${entry.email}</td>
+                            <td>${checkInDate.toLocaleDateString()}</td>
+                            <td>${checkInDate.toLocaleTimeString()}</td>
+                            <td>${checkOutDate ? checkOutDate.toLocaleDateString() : 'Not Checked Out'}</td>
+                            <td>${checkOutDate ? checkOutDate.toLocaleTimeString() : 'Not Checked Out'}</td>
+                            <td>${hoursUtilized}</td>
+                            <td>${totalPrice}</td>
+                        </tr>`;
+                        dashboardTableBody.innerHTML += row;
+                    });
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching entries:', error);
+            showPopup('Error fetching entries: ' + error.message, 'error');
+        });
+};
     window.toggleSelectAll = function () {
         const selectAll = document.getElementById("selectAll").checked;
         document.querySelectorAll(".entryCheckbox").forEach(checkbox => {
@@ -327,70 +327,72 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     window.filterEntries = function () {
-        const searchValue = document.getElementById("searchApx").value.toLowerCase();
-        const filterTime = document.getElementById("filterTime").value;
+    const searchValue = document.getElementById("searchApx").value.toLowerCase();
+    const filterTime = document.getElementById("filterTime").value;
 
-        fetch(`${BASE_URL}/api/entries`)
-            .then(response => response.json())
-            .then(entries => {
-                let filteredEntries = entries.filter(entry => 
-                    entry.apxnumber.toLowerCase().includes(searchValue)
+    fetch(`${BASE_URL}/api/entries`)
+        .then(response => response.json())
+        .then(entries => {
+            let filteredEntries = entries.filter(entry => 
+                entry.apxnumber.toLowerCase().includes(searchValue)
+            );
+
+            const now = new Date();
+            if (filterTime === "month") {
+                filteredEntries = filteredEntries.filter(entry => 
+                    new Date(entry.checkintime).getMonth() === now.getMonth() &&
+                    new Date(entry.checkintime).getFullYear() === now.getFullYear()
                 );
+            } else if (filterTime === "week") {
+                const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+                filteredEntries = filteredEntries.filter(entry => 
+                    new Date(entry.checkintime) >= weekAgo
+                );
+            } else if (filterTime === "year") {
+                filteredEntries = filteredEntries.filter(entry => 
+                    new Date(entry.checkintime).getFullYear() === now.getFullYear()
+                );
+            } else if (filterTime === "latest") {
+                filteredEntries.sort((a, b) => new Date(b.checkintime) - new Date(a.checkintime));
+            }
 
-                const now = new Date();
-                if (filterTime === "month") {
-                    filteredEntries = filteredEntries.filter(entry => 
-                        new Date(entry.checkintime).getMonth() === now.getMonth() &&
-                        new Date(entry.checkintime).getFullYear() === now.getFullYear()
-                    );
-                } else if (filterTime === "week") {
-                    const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
-                    filteredEntries = filteredEntries.filter(entry => 
-                        new Date(entry.checkintime) >= weekAgo
-                    );
-                } else if (filterTime === "year") {
-                    filteredEntries = filteredEntries.filter(entry => 
-                        new Date(entry.checkintime).getFullYear() === now.getFullYear()
-                    );
-                } else if (filterTime === "latest") {
-                    filteredEntries.sort((a, b) => new Date(b.checkintime) - new Date(a.checkintime));
-                }
+            const dashboardTableBody = document.getElementById("dashboardTableBody");
+            dashboardTableBody.innerHTML = "";
+            if (filteredEntries.length === 0) {
+                dashboardTableBody.innerHTML = "<tr><td colspan='14'>No entries found</td></tr>";
+            } else {
+                filteredEntries.forEach(entry => {
+                    let checkInDate = new Date(entry.checkintime);
+                    let checkOutDate = entry.checkouttime ? new Date(entry.checkouttime) : null;
+                    let hoursUtilized = checkOutDate ? calculateHours(checkInDate, checkOutDate) : 'Not Checked Out';
+                    let totalPrice = entry.totalprice !== null ? entry.totalprice.toFixed(2) : "N/A";
+                    let vehicleWeightText = entry.vehicleweight === "less_than_3.5" ? "Less than 3.5 tonnes" : "Greater than 3.5 tonnes";
 
-                const dashboardTableBody = document.getElementById("dashboardTableBody");
-                dashboardTableBody.innerHTML = "";
-                if (filteredEntries.length === 0) {
-                    dashboardTableBody.innerHTML = "<tr><td colspan='13'>No entries found</td></tr>"; // Adjusted colspan
-                } else {
-                    filteredEntries.forEach(entry => {
-                        let checkInDate = new Date(entry.checkintime);
-                        let checkOutDate = entry.checkouttime ? new Date(entry.checkouttime) : null;
-                        let hoursUtilized = checkOutDate ? calculateHours(checkInDate, checkOutDate) : 'Not Checked Out';
-                        let totalPrice = entry.totalprice !== null ? entry.totalprice.toFixed(2) : "N/A";
-
-                        let row = `<tr>
-                            <td><input type="checkbox" class="entryCheckbox" value="${entry.apxnumber}"></td>
-                            <td>${entry.apxnumber}</td>
-                            <td>${entry.modelname}</td>
-                            <td>${entry.track}</td>
-                            <td>${entry.tracknumber}</td>
-                            <td>${entry.drivername}</td> <!-- Replaced username with drivername -->
-                            <td>${entry.email}</td>
-                            <td>${checkInDate.toLocaleDateString()}</td>
-                            <td>${checkInDate.toLocaleTimeString()}</td>
-                            <td>${checkOutDate ? checkOutDate.toLocaleDateString() : 'Not Checked Out'}</td>
-                            <td>${checkOutDate ? checkOutDate.toLocaleTimeString() : 'Not Checked Out'}</td>
-                            <td>${hoursUtilized}</td>
-                            <td>${totalPrice}</td>
-                        </tr>`;
-                        dashboardTableBody.innerHTML += row;
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error filtering entries:', error);
-                showPopup('Error filtering entries: ' + error.message, 'error');
-            });
-    };
+                    let row = `<tr>
+                        <td><input type="checkbox" class="entryCheckbox" value='${JSON.stringify({ apxNumber: entry.apxnumber, checkInTime: entry.checkintime })}'></td>
+                        <td>${entry.apxnumber}</td>
+                        <td>${entry.modelname}</td>
+                        <td>${entry.track}</td>
+                        <td>${entry.tracknumber}</td>
+                        <td>${vehicleWeightText}</td>
+                        <td>${entry.drivername}</td>
+                        <td>${entry.email}</td>
+                        <td>${checkInDate.toLocaleDateString()}</td>
+                        <td>${checkInDate.toLocaleTimeString()}</td>
+                        <td>${checkOutDate ? checkOutDate.toLocaleDateString() : 'Not Checked Out'}</td>
+                        <td>${checkOutDate ? checkOutDate.toLocaleTimeString() : 'Not Checked Out'}</td>
+                        <td>${hoursUtilized}</td>
+                        <td>${totalPrice}</td>
+                    </tr>`;
+                    dashboardTableBody.innerHTML += row;
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error filtering entries:', error);
+            showPopup('Error filtering entries: ' + error.message, 'error');
+        });
+};
 
     window.login = function () {
         const username = document.getElementById("username").value;
@@ -561,32 +563,33 @@ window.updateTrackPrice = function (track, subTrack, vehicleWeight) {
     };
 
     window.exportToExcel = function () {
-        fetch(`${BASE_URL}/api/entries`)
-            .then(response => response.json())
-            .then(entries => {
-                if (entries.length === 0) {
-                    showPopup("No data to export!", 'error');
-                    return;
-                }
+    fetch(`${BASE_URL}/api/entries`)
+        .then(response => response.json())
+        .then(entries => {
+            if (entries.length === 0) {
+                showPopup("No data to export!", 'error');
+                return;
+            }
 
-                let csvContent = "APX Number,Model Name,Track,Track Number,Driver Name,Email,Check-In Date,Check-In Time,Check-Out Date,Check-Out Time,Hours Utilized,Total Price (₹)\n"; // Updated header
-                entries.forEach(entry => {
-                    let checkInDate = new Date(entry.checkintime);
-                    let checkOutDate = entry.checkouttime ? new Date(entry.checkouttime) : null;
-                    let hoursUtilized = checkOutDate ? calculateHours(checkInDate, checkOutDate) : 'Not Checked Out';
-                    let totalPrice = entry.totalprice !== null ? entry.totalprice.toFixed(2) : "N/A";
+            let csvContent = "APX Number,Model Name,Track,Track Number,Vehicle Weight,Driver Name,Email,Check-In Date,Check-In Time,Check-Out Date,Check-Out Time,Hours Utilized,Total Price (₹)\n";
+            entries.forEach(entry => {
+                let checkInDate = new Date(entry.checkintime);
+                let checkOutDate = entry.checkouttime ? new Date(entry.checkouttime) : null;
+                let hoursUtilized = checkOutDate ? calculateHours(checkInDate, checkOutDate) : 'Not Checked Out';
+                let totalPrice = entry.totalprice !== null ? entry.totalprice.toFixed(2) : "N/A";
+                let vehicleWeightText = entry.vehicleweight === "less_than_3.5" ? "Less than 3.5 tonnes" : "Greater than 3.5 tonnes";
 
-                    csvContent += `${entry.apxnumber},${entry.modelname},${entry.track},${entry.tracknumber},${entry.drivername},${entry.email},${checkInDate.toLocaleDateString()},${checkInDate.toLocaleTimeString()},${checkOutDate ? checkOutDate.toLocaleDateString() : 'Not Checked Out'},${checkOutDate ? checkOutDate.toLocaleTimeString() : 'Not Checked Out'},${hoursUtilized},${totalPrice}\n`;
-                });
+                csvContent += `${entry.apxnumber},${entry.modelname},${entry.track},${entry.tracknumber},${vehicleWeightText},${entry.drivername},${entry.email},${checkInDate.toLocaleDateString()},${checkInDate.toLocaleTimeString()},${checkOutDate ? checkOutDate.toLocaleDateString() : 'Not Checked Out'},${checkOutDate ? checkOutDate.toLocaleTimeString() : 'Not Checked Out'},${hoursUtilized},${totalPrice}\n`;
+            });
 
-                let blob = new Blob([csvContent], { type: "text/csv" });
-                let link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = "track_entries.csv";
-                link.click();
-            })
-            .catch(error => console.error('Error exporting to Excel:', error));
-    };
+            let blob = new Blob([csvContent], { type: "text/csv" });
+            let link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "track_entries.csv";
+            link.click();
+        })
+        .catch(error => console.error('Error exporting to Excel:', error));
+};
 
     window.clearEntries = function () {
         if (confirm("Are you sure you want to clear all entries? This action cannot be undone.")) {
