@@ -31,7 +31,7 @@ async function sendEmail(to, subject, text) {
 router.post('/checkin', async (req, res) => {
   try {
     console.log('Received /checkin request:', req.body);
-    const { apxNumber, modelName, track, trackNumber, driverName, checkInTime, email } = req.body;
+    const { apxNumber, modelName, track, trackNumber, vehicleWeight, driverName, checkInTime, email } = req.body;
 
     const result = await client.execute(
       'SELECT * FROM test_entries WHERE apxNumber = ? AND checkOutTime = ? ALLOW FILTERING',
@@ -49,6 +49,7 @@ router.post('/checkin', async (req, res) => {
       modelName,
       track,
       trackNumber,
+      vehicleWeight,
       driverName,
       email,
       checkInTime: checkInTime || nowUTC.toISOString(),
@@ -58,8 +59,8 @@ router.post('/checkin', async (req, res) => {
     console.log('Prepared entry to insert:', entry);
 
     await client.execute(
-      'INSERT INTO test_entries (apxNumber, modelName, track, trackNumber, driverName, email, checkInTime, checkOutTime, totalPrice) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [entry.apxNumber, entry.modelName, entry.track, entry.trackNumber, entry.driverName, entry.email, entry.checkInTime, entry.checkOutTime, entry.totalPrice],
+      'INSERT INTO test_entries (apxNumber, modelName, track, trackNumber, vehicleWeight, driverName, email, checkInTime, checkOutTime, totalPrice) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [entry.apxNumber, entry.modelName, entry.track, entry.trackNumber, entry.vehicleWeight, entry.driverName, entry.email, entry.checkInTime, entry.checkOutTime, entry.totalPrice],
       { prepare: true }
     );
     console.log('Entry inserted successfully');
