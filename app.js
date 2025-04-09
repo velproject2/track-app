@@ -472,59 +472,64 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     window.displaySubTracks = function () {
-        const track = document.getElementById("trackSelect").value;
-        const subTrackTable = document.getElementById("subTrackTable");
-        const subTrackTableBody = document.getElementById("subTrackTableBody");
-        subTrackTableBody.innerHTML = "";
+    const track = document.getElementById("trackSelect").value;
+    const subTrackTable = document.getElementById("subTrackTable");
+    const subTrackTableBody = document.getElementById("subTrackTableBody");
+    subTrackTableBody.innerHTML = "";
 
-        if (!track) {
-            subTrackTable.style.display = "none";
-            return;
-        }
+    if (!track) {
+        subTrackTable.style.display = "none";
+        return;
+    }
 
-        fetch(`${BASE_URL}/api/admin/track-prices`)
-            .then(response => response.json())
-            .then(prices => {
-                subTrackTable.style.display = "table";
-                trackNumbers[track].forEach(subTrack => {
-                    const priceObj = prices.find(p => p.track === track && p.subtrack === subTrack);
+    fetch(`${BASE_URL}/api/admin/track-prices`)
+        .then(response => response.json())
+        .then(prices => {
+            subTrackTable.style.display = "table";
+            const vehicleWeights = ["less_than_3.5", "greater_than_3.5"];
+            trackNumbers[track].forEach(subTrack => {
+                vehicleWeights.forEach(weight => {
+                    const priceObj = prices.find(p => p.track === track && p.subtrack === subTrack && p.vehicleweight === weight);
                     const price = priceObj ? priceObj.price : "Not Set";
+                    const weightText = weight === "less_than_3.5" ? "Less than 3.5 tonnes" : "Greater than 3.5 tonnes";
                     const row = `<tr>
                         <td>${subTrack}</td>
+                        <td>${weightText}</td>
                         <td>${price}</td>
-                        <td><button class="update-btn" onclick="updateTrackPrice('${track}', '${subTrack}')">Update</button></td>
+                        <td><button class="update-btn" onclick="updateTrackPrice('${track}', '${subTrack}', '${weight}')">Update</button></td>
                     </tr>`;
                     subTrackTableBody.innerHTML += row;
                 });
-            })
-            .catch(error => console.error('Error fetching track prices:', error));
-    };
+            });
+        })
+        .catch(error => console.error('Error fetching track prices:', error));
+};
 
-    window.updateTrackPrice = function (track, subTrack) {
-        const price = prompt(`Enter price for ${track} - ${subTrack}:`);
-        if (price !== null && price !== "") {
-            const priceValue = parseFloat(price);
-            if (isNaN(priceValue) || priceValue < 0) {
-                showPopup("Please enter a valid positive number for the price.", 'error');
-                return;
-            }
-
-            fetch(`${BASE_URL}/api/admin/track-prices`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ track, subTrack, price: priceValue })
-            })
-            .then(response => response.json())
-            .then(data => {
-                displaySubTracks();
-                showPopup(`Price for ${track} - ${subTrack} updated to ${priceValue}!`);
-                if (document.getElementById("dashboardTableBody")) {
-                    displayDashboardEntries();
-                }
-            })
-            .catch(error => showPopup('Failed to update price: ' + error.message, 'error'));
+window.updateTrackPrice = function (track, subTrack, vehicleWeight) {
+    const price = prompt(`Enter price for ${track} - ${subTrack} (${vehicleWeight === 'less_than_3.5' ? 'Less than 3.5 tonnes' : 'Greater than 3.5 tonnes'}):`);
+    if (price !== null && price !== "") {
+        const priceValue = parseFloat(price);
+        if (isNaN(priceValue) || priceValue < 0) {
+            showPopup("Please enter a valid positive number for the price.", 'error');
+            return;
         }
-    };
+
+        fetch(`${BASE_URL}/api/admin/track-prices`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ track, subTrack, vehicleWeight, price: priceValue })
+        })
+        .then(response => response.json())
+        .then(data => {
+            displaySubTracks();
+            showPopup(`Price for ${track} - ${subTrack} (${vehicleWeight === 'less_than_3.5' ? 'Less than 3.5 tonnes' : 'Greater than 3.5 tonnes'}) updated to ${priceValue}!`);
+            if (document.getElementById("dashboardTableBody")) {
+                displayDashboardEntries();
+            }
+        })
+        .catch(error => showPopup('Failed to update price: ' + error.message, 'error'));
+    }
+};
 
     window.setGSTRate = function () {
         const gstRate = prompt("Enter GST rate (%):");
