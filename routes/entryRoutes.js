@@ -118,7 +118,6 @@ router.post('/checkout', async (req, res) => {
     if (priceResult.rows.length === 0) {
       console.warn(`No price found for track: ${entry.track}, subTrack: ${entry.tracknumber}, vehicleWeight: ${vehicleWeight}. Defaulting to 0`);
       price = 0; // Fallback price
-      // Optionally notify admin
       await sendEmail(
         process.env.ADMIN_EMAIL,
         'Missing Price Alert',
@@ -135,6 +134,10 @@ router.post('/checkout', async (req, res) => {
 
     const totalPrice = hoursBilled * price * (1 + gstRate / 100);
 
+    // Format timestamps to IST for the email
+    const checkInFormatted = new Date(checkInTime).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+    const checkOutFormatted = new Date(checkOut).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+
     await client.execute(
       'UPDATE test_entries SET checkOutTime = ?, totalPrice = ? WHERE apxNumber = ? AND checkInTime = ?',
       [checkOut, totalPrice, apxNumber, checkInTime],
@@ -145,7 +148,7 @@ router.post('/checkout', async (req, res) => {
     await sendEmail(
       entry.email,
       'Check-Out Confirmation :)',
-      `Hello,\n\nCheck-out has been completed by: ${entry.drivername}\nfor APX Number: ${apxNumber}\nModel: ${entry.modelname}\nTrack: ${entry.track} - ${entry.tracknumber}\nVehicle Weight: ${vehicleWeight === 'less_than_3.5' ? 'Less than 3.5 tonnes' : 'Greater than 3.5 tonnes'}\nCheck-In: ${checkInTime}\nCheck-Out: ${checkOut}\nHours Utilized: ${hoursUtilized.toFixed(2)}\nTotal Price(Incl.GST): ₹${totalPrice.toFixed(2)}\n\nThank you!\n\n\nRegards@VEL`
+      `Hello,\n\nCheck-out has been completed by: ${entry.drivername}\nfor APX Number: ${apxNumber}\nModel: ${entry.modelname}\nTrack: ${entry.track} - ${entry.tracknumber}\nVehicle Weight: ${vehicleWeight === 'less_than_3.5' ? 'Less than 3.5 tonnes' : 'Greater than 3.5 tonnes'}\nCheck-In: ${checkInFormatted}\nCheck-Out: ${checkOutFormatted}\nHours Utilized: ${hoursUtilized.toFixed(2)}\nTotal Price(Incl.GST): ₹${totalPrice.toFixed(2)}\n\nThank you!\n\n\nRegards@VEL`
     );
 
     const updatedEntry = { ...entry, checkOutTime: checkOut, totalPrice };
