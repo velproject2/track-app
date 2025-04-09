@@ -11,13 +11,23 @@
             width: 100%;
             max-width: 1200px;
             margin: 0 auto;
-            position: relative; 
+            position: relative;
         }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
         .button-group {
             display: flex;
-            justify-content: center; 
+            justify-content: center;
             margin-bottom: 20px;
         }
+
         .button-group button {
             width: 200px;
             height: 40px;
@@ -26,25 +36,31 @@
             text-align: center;
             cursor: pointer;
         }
+
         .profile-icon {
-            position: absolute;
-            top: 30px;
-            right:40px;
+            font-size: 28px;
             cursor: pointer;
-            font-size: 28px; 
+            padding: 5px;
+            transition: font-size 0.3s ease;
         }
+
+        .profile-icon:hover {
+            color: #ff9800; /* Visual feedback */
+        }
+
         .dropdown-menu {
-            display: none; 
+            display: none;
             position: absolute;
-            top: 70px; 
-            right: 40px;
+            top: 100%; /* Position below the icon */
+            right: 0;
             background-color: #ff9800;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             z-index: 1000;
         }
+
         .dropdown-menu button {
             display: block;
-            width: 200px; 
+            width: 200px;
             height: 40px;
             font-size: 12px;
             padding: 0;
@@ -53,8 +69,63 @@
             background-color: #ff9800;
             cursor: pointer;
         }
+
         .dropdown-menu button:hover {
             background-color: #f1b175;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .admin-header {
+                flex-direction: column;
+                align-items: center;
+                padding: 10px;
+            }
+
+            .profile-icon {
+                font-size: 24px; /* Slightly smaller */
+                position: static; /* Remove absolute positioning */
+                margin-top: 10px;
+            }
+
+            .dropdown-menu {
+                position: static; /* Flow naturally below icon */
+                width: 100%;
+                max-width: 200px; /* Match button width */
+                margin: 0 auto;
+            }
+
+            .button-group button {
+                width: 150px; /* Shrink buttons */
+                font-size: 14px;
+            }
+
+            #subTrackTable {
+                font-size: 12px; /* Smaller table text */
+            }
+
+            #subTrackTable th, #subTrackTable td {
+                padding: 5px; /* Reduce padding */
+            }
+        }
+
+        @media (max-width: 400px) {
+            .profile-icon {
+                font-size: 20px; /* Further shrink */
+            }
+
+            .admin-header h1 {
+                font-size: 20px; /* Smaller title */
+            }
+
+            .button-group button {
+                width: 120px; /* Even smaller */
+                font-size: 12px;
+            }
+
+            .dropdown-menu button {
+                width: 120px; /* Match button-group size */
+            }
         }
     </style>
 </head>
@@ -70,8 +141,10 @@
         <p id="loginError" style="color: red; display: none;">Invalid credentials</p>
     </div>
     <div id="adminDashboard" class="container" style="display: none;">
-        <h1>Admin Dashboard</h1>
-        <span class="profile-icon" onclick="toggleDropdown()">👤</span>
+        <div class="admin-header">
+            <h1>Admin Dashboard</h1>
+            <span class="profile-icon" onclick="toggleDropdown()">👤</span>
+        </div>
         <div class="dropdown-menu" id="profileDropdown">
             <button onclick="changeAdminPassword()">Change Admin Password</button>
             <button onclick="changeDashboardPassword()">Change Dashboard Password</button>
