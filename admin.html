@@ -39,7 +39,6 @@
             top: 70px; 
             right: 40px;
             background-color: #ff9800;
-           
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             z-index: 1000;
         }
@@ -72,7 +71,7 @@
     </div>
     <div id="adminDashboard" class="container" style="display: none;">
         <h1>Admin Dashboard</h1>
-        <span class="profile-icon" onclick="toggleDropdown()">👤</span> <!-- Profile icon -->
+        <span class="profile-icon" onclick="toggleDropdown()">👤</span>
         <div class="dropdown-menu" id="profileDropdown">
             <button onclick="changeAdminPassword()">Change Admin Password</button>
             <button onclick="changeDashboardPassword()">Change Dashboard Password</button>
@@ -95,6 +94,7 @@
                 <thead>
                     <tr>
                         <th>Sub Track</th>
+                        <th>Vehicle Weight</th>
                         <th>Current Price</th>
                         <th>Action</th>
                     </tr>
@@ -110,7 +110,6 @@
             const dropdown = document.getElementById("profileDropdown");
             dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
         }
-        // Close dropdown if clicking outside
         document.addEventListener("click", function(event) {
             const dropdown = document.getElementById("profileDropdown");
             const icon = document.querySelector(".profile-icon");
