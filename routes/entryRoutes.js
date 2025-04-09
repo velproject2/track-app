@@ -143,7 +143,6 @@ router.post('/checkout', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
 router.post('/delete-selected', async (req, res) => {
   try {
     console.log('Received /delete-selected request:', req.body);
