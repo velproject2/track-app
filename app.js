@@ -126,46 +126,48 @@ document.addEventListener("DOMContentLoaded", function () {
     
    
       window.displayIncompleteEntries = function (track) {
-        console.log('Fetching incomplete entries for track:', track);
-        fetch(`${BASE_URL}/api/incomplete-entries?track=${track}`)
-          .then(response => {
-            console.log('Response status:', response.status);
-            if (!response.ok) throw new Error('Failed to fetch incomplete entries: ' + response.statusText);
-            return response.json();
-          })
-          .then(entries => {
-            console.log('Incomplete entries received:', entries);
-            const tbody = document.getElementById('incompleteEntriesBody');
-            if (!tbody) {
-              console.warn('Table body not found');
-              return;
-            }
-            tbody.innerHTML = '';
-            if (entries.length === 0) {
-              console.log('No incomplete entries to display');
-              tbody.innerHTML = '<tr><td colspan="7">No incomplete entries found</td></tr>';
-            } else {
-              entries.forEach(entry => {
-                console.log('Rendering entry:', entry.apxnumber);
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                  <td>${entry.apxnumber}</td>
-                  <td>${entry.modelname}</td>
-                  <td>${entry.tracknumber}</td>
-                  <td>${entry.drivername}</td>
-                  <td>${entry.email}</td>
-                  <td>${new Date(entry.checkintime).toLocaleString()}</td>
-                  <td><button class="complete-btn" onclick="completeEntryManually('${entry.apxnumber}', '${entry.checkintime}')">Complete Manually</button></td>
-                `;
-                tbody.appendChild(row);
-              });
-            }
-          })
-          .catch(error => {
-            console.error('Error fetching incomplete entries:', error);
-            showPopup('Failed to fetch incomplete entries: ' + error.message, 'error');
-          });
-      };
+  console.log('Fetching incomplete entries for track:', track);
+  fetch(`${BASE_URL}/api/incomplete-entries?track=${track}`)
+    .then(response => {
+      console.log('Response status:', response.status);
+      if (!response.ok) throw new Error('Failed to fetch incomplete entries: ' + response.statusText);
+      return response.json();
+    })
+    .then(entries => {
+      console.log('Incomplete entries received:', entries);
+      const tbody = document.getElementById('incompleteEntriesBody');
+      if (!tbody) {
+        console.warn('Table body not found');
+        return;
+      }
+      tbody.innerHTML = '';
+      if (entries.length === 0) {
+        console.log('No incomplete entries to display');
+        tbody.innerHTML = '<tr><td colspan="8">No incomplete entries found</td></tr>'; // Updated colspan
+      } else {
+        entries.forEach(entry => {
+          console.log('Rendering entry:', entry.apxnumber);
+          const vehicleWeightText = entry.vehicleweight === 'less_than_3.5' ? 'Less than 3.5 tonnes' : (entry.vehicleweight === 'greater_than_3.5' ? 'Greater than 3.5 tonnes' : 'Not specified');
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${entry.apxnumber}</td>
+            <td>${entry.modelname}</td>
+            <td>${entry.tracknumber}</td>
+            <td>${entry.vehicleWeightText}</td>
+            <td>${entry.drivername}</td>
+            <td>${entry.email}</td>
+            <td>${new Date(entry.checkintime).toLocaleString()}</td>
+            <td><button class="complete-btn" onclick="completeEntryManually('${entry.apxnumber}', '${entry.checkintime}')">Complete Manually</button></td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching incomplete entries:', error);
+      showPopup('Failed to fetch incomplete entries: ' + error.message, 'error');
+    });
+};
     
       // Updated function to show modal
       let currentApxNumber, currentCheckInTime;
