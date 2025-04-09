@@ -1,7 +1,7 @@
 async function initialize(client) {
     try {
       await client.execute(
-        'CREATE TABLE IF NOT EXISTS track_prices (track text, subTrack text, price double, PRIMARY KEY (track, subTrack))'
+        'CREATE TABLE IF NOT EXISTS track_prices (track text, subTrack text, vehicleWeight text, price double, PRIMARY KEY ((track, subTrack), vehicleWeight))'
       );
       console.log('Track_prices table initialized');
     } catch (err) {
