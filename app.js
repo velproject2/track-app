@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const trackNumbers = {
         "GARC": ["G1", "G2", "G3", "G4"],
         "WABCO": ["W1", "W2", "W3"],
-        "NATRAX": ["T1 (High Speed Track)", "T2 (Dynamic Platform)", "T3 (Braking Track - Dry)", "T3 (Braking Track - Wet)", "T4 (Test Hill / Gradient)", "T5a (Fatigue Track - 0.5m)", "T5a (Fatigue Track - 1.0m)", "T13 (Noise Track)"],
+        "NATRAX": ["T1 (High Speed Track)", "T2 (Dynamic Platform)", "T3 (Braking Track - Dry)", "T3 (Braking Track - Wet)", "T4 (Test Hill / Gradient)", "T5a (Fatigue Track - 0.5m)", "T5c (Fatigue Track - 1.0m)", "T13 (Noise Track)"],
         "NCAT": ["NC1", "NC2"],
         "MSPT": ["M1", "M2", "M3"]
     };
