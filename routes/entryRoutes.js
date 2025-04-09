@@ -77,13 +77,18 @@ router.post('/checkout', async (req, res) => {
     console.log('Received /checkout request:', req.body);
     const { apxNumber, checkOutTime } = req.body;
 
+    if (!apxNumber) {
+      console.log('Missing apxNumber in request');
+      return res.status(400).json({ message: 'APX Number is required' });
+    }
+
     const result = await client.execute(
       'SELECT * FROM test_entries WHERE apxNumber = ? AND checkOutTime = ? ALLOW FILTERING',
       [apxNumber, ''],
       { prepare: true }
     );
     if (result.rows.length === 0) {
-      console.log('No active check-in found');
+      console.log('No active check-in found for apxNumber:', apxNumber);
       return res.status(400).json({ message: 'No matching Check-In found for this APX Number!' });
     }
 
@@ -97,12 +102,11 @@ router.post('/checkout', async (req, res) => {
     const hoursBilled = Math.ceil(hoursUtilized);
 
     if (!entry.track || !entry.tracknumber) {
-      console.log('Missing track or trackNumber in entry');
+      console.log('Missing track or trackNumber in entry:', entry);
       return res.status(400).json({ message: 'Check-in entry is missing track or trackNumber data!' });
     }
 
-    // Handle null vehicleWeight with a default
-    const vehicleWeight = entry.vehicleweight || 'less_than_3.5';
+    const vehicleWeight = entry.vehicleweight || 'less_than_3.5'; // Default if null
     console.log('Using vehicleWeight:', vehicleWeight);
 
     const priceResult = await client.execute(
@@ -110,11 +114,19 @@ router.post('/checkout', async (req, res) => {
       [entry.track, entry.tracknumber, vehicleWeight],
       { prepare: true }
     );
+    let price;
     if (priceResult.rows.length === 0) {
-      console.log(`No price found for track: ${entry.track}, subTrack: ${entry.tracknumber}, vehicleWeight: ${vehicleWeight}`);
-      return res.status(400).json({ message: `No price defined for track ${entry.track}, subTrack ${entry.tracknumber}, and vehicleWeight ${vehicleWeight}` });
+      console.warn(`No price found for track: ${entry.track}, subTrack: ${entry.tracknumber}, vehicleWeight: ${vehicleWeight}. Defaulting to 0`);
+      price = 0; // Fallback price
+      // Optionally notify admin
+      await sendEmail(
+        process.env.ADMIN_EMAIL,
+        'Missing Price Alert',
+        `No price defined for track: ${entry.track}, subTrack: ${entry.tracknumber}, vehicleWeight: ${vehicleWeight}. Please add it in the admin panel.`
+      );
+    } else {
+      price = priceResult.rows[0].price;
     }
-    const price = priceResult.rows[0].price;
     console.log('Price fetched:', price);
 
     const gstResult = await client.execute('SELECT rate FROM gst_rate WHERE id = ?', ['default'], { prepare: true });
@@ -139,10 +151,11 @@ router.post('/checkout', async (req, res) => {
     const updatedEntry = { ...entry, checkOutTime: checkOut, totalPrice };
     res.status(200).json(updatedEntry);
   } catch (error) {
-    console.error('Error in /checkout:', error);
-    res.status(500).json({ message: error.message });
+    console.error('Error in /checkout for apxNumber:', apxNumber, error);
+    res.status(500).json({ message: `Failed to complete entry: ${error.message}` });
   }
 });
+
 router.post('/delete-selected', async (req, res) => {
   try {
     console.log('Received /delete-selected request:', req.body);
