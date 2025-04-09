@@ -95,14 +95,14 @@ router.post('/checkout', async (req, res) => {
     const hoursUtilized = calculateHours(checkInTime, checkOut);
     const hoursBilled = Math.ceil(hoursUtilized);
 
-    if (!entry.track || !entry.tracknumber) {
-      console.log('Missing track or trackNumber in entry');
-      return res.status(400).json({ message: 'Check-in entry is missing track or trackNumber data!' });
+    if (!entry.track || !entry.tracknumber || !entry.vehicleweight) {
+      console.log('Missing track, trackNumber, or vehicleWeight in entry');
+      return res.status(400).json({ message: 'Check-in entry is missing track, trackNumber, or vehicleWeight data!' });
     }
 
     const priceResult = await client.execute(
-      'SELECT price FROM track_prices WHERE track = ? AND subTrack = ?',
-      [entry.track, entry.tracknumber],
+      'SELECT price FROM track_prices WHERE track = ? AND subTrack = ? AND vehicleWeight = ?',
+      [entry.track, entry.tracknumber, entry.vehicleweight],
       { prepare: true }
     );
     const price = priceResult.rows.length > 0 ? priceResult.rows[0].price : 0;
@@ -124,7 +124,7 @@ router.post('/checkout', async (req, res) => {
     await sendEmail(
       entry.email,
       'Check-Out Confirmation :)',
-      `Hello,\n\nCheck-out has been completed by: ${entry.drivername}\nfor APX Number: ${apxNumber}\nModel: ${entry.modelname}\nTrack: ${entry.track} - ${entry.tracknumber}\nCheck-In: ${checkInTime}\nCheck-Out: ${checkOut}\nHours Utilized: ${hoursUtilized.toFixed(2)}\nTotal Price(Incl.GST): ₹${totalPrice.toFixed(2)}\n\nThank you!\n\n\nRegards@VEL`
+      `Hello,\n\nCheck-out has been completed by: ${entry.drivername}\nfor APX Number: ${apxNumber}\nModel: ${entry.modelname}\nTrack: ${entry.track} - ${entry.tracknumber}\nVehicle Weight: ${entry.vehicleweight === 'less_than_3.5' ? 'Less than 3.5 tonnes' : 'Greater than 3.5 tonnes'}\nCheck-In: ${checkInTime}\nCheck-Out: ${checkOut}\nHours Utilized: ${hoursUtilized.toFixed(2)}\nTotal Price(Incl.GST): ₹${totalPrice.toFixed(2)}\n\nThank you!\n\n\nRegards@VEL`
     );
 
     const updatedEntry = { ...entry, checkOutTime: checkOut, totalPrice };
